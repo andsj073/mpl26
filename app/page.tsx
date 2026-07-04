@@ -23,7 +23,7 @@ export default async function DashboardPage() {
     string,
     { title: string; color: string }[]
   >();
-  let notesByDay = new Map<string, string>();
+  const notesByDay = new Map<string, string>();
   let activityCount = 0;
 
   if (hasDb()) {
