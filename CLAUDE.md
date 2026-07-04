@@ -19,11 +19,16 @@ vad som hänt tidigare i konversationen.
 - **Leo** 17 (fyller 18 den 17 juli), naturvetenskap Sjölins Stockholm, 
   gillar utegym och kalastenik
 - **Elton** 9, coachas i fotboll av Andreas
+- **Viktor**, med 15–22 juli: landar 15/7 kl 14.00 på MPL, reser hem
+  22/7 kl 14.50 med Leja och Leo
 
 Alkohol i Frankrike: 18+. Leo är 17 fram till 17 juli.
 
+Resedatum: William & Anna hem 20/7 kl 14.50 (MPL), Leja/Leo/Viktor
+hem 22/7 kl 14.50 (MPL). Övriga 10–24 juli.
+
 Bor: 12 Rue Nicolas Copernic, Hôpitaux-Facultés, Montpellier.
-Egen bil på plats: 5 platser, 7 personer, alltid ett pussel.
+Egen bil på plats: 5 platser, upp till 8 personer, alltid ett pussel.
 
 ## Stack
 

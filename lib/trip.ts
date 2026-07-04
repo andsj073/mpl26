@@ -13,7 +13,10 @@ const SPECIALS: Record<string, string> = {
   "2026-07-10": "Ankomst",
   "2026-07-12": "Elin fyller 50 🎉",
   "2026-07-14": "Frankrikes nationaldag — fyrverkerier",
+  "2026-07-15": "Viktor landar 14.00 ✈️",
   "2026-07-17": "Leo fyller 18 🎂",
+  "2026-07-20": "William & Anna reser hem 14.50 ✈️",
+  "2026-07-22": "Leja, Leo & Viktor reser hem 14.50 ✈️",
   "2026-07-24": "Hemresa",
 };
 

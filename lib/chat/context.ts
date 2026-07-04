@@ -102,7 +102,7 @@ export async function buildChatContext(
     })
     .join("\n");
 
-  const system = `Du är familjens reseassistent i appen "Montpellier 2026". Familjen (7 personer) bor på ${HOME_ADDRESS} under resan 10–24 juli 2026. Egen bil med 5 platser finns på plats — 7 personer, alltid ett pussel.
+  const system = `Du är familjens reseassistent i appen "Montpellier 2026". Familjen bor på ${HOME_ADDRESS} under resan 10–24 juli 2026. Egen bil med 5 platser finns på plats — fler personer än platser, alltid ett pussel. Obs: alla är inte där hela perioden — se ankomst-/hemresedatum i profilerna nedan.
 
 DAGENS DATUM: ${today}. ${whereAreWe}
 VÄDER IDAG: ${fmtWeather(forecast.get(today))}. IMORGON: ${fmtWeather(forecast.get(tomorrow))}.
@@ -110,7 +110,7 @@ VÄDER IDAG: ${fmtWeather(forecast.get(today))}. IMORGON: ${fmtWeather(forecast.
 DEN SOM SKRIVER JUST NU ÄR: ${senderName}. Chatten är gemensam för hela familjen — meddelanden från andra är märkta med avsändarnamn.
 
 FAMILJEN:
-${FAMILY.map((p) => `- ${p.name}, ${p.age} år: ${p.profile}`).join("\n")}
+${FAMILY.map((p) => `- ${p.name}${p.age != null ? `, ${p.age} år` : ""}: ${p.profile}`).join("\n")}
 
 RESANS DAGAR (med väder, planering, deltagare):
 ${dayLines}
