@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
-import { cn } from "@/lib/utils";
+import { personColor } from "@/lib/family";
 
 type Msg = {
   id: string;
@@ -215,29 +215,30 @@ export default function ChattPage() {
 }
 
 function MessageBubble({ msg, me }: { msg: Msg; me: string | null }) {
+  // Assistenten till vänster, alla resenärer till höger —
+  // varje resenär i sin egen färg.
   if (msg.role === "assistant") {
     return (
-      <div className="rounded-xl rounded-bl-sm border border-border bg-card p-3 text-sm shadow-sm">
-        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
-          Assistenten
-        </p>
-        <div className="whitespace-pre-wrap">{msg.content}</div>
+      <div className="flex justify-start">
+        <div className="max-w-[88%] rounded-xl rounded-bl-sm border border-border bg-card p-3 text-sm shadow-sm">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
+            Assistenten
+          </p>
+          <div className="whitespace-pre-wrap">{msg.content}</div>
+        </div>
       </div>
     );
   }
+  const color = personColor(msg.author);
   const mine = msg.author === me;
   return (
-    <div className={cn("flex", mine ? "justify-end" : "justify-start")}>
+    <div className="flex justify-end">
       <div
-        className={cn(
-          "max-w-[85%] rounded-xl p-3 text-sm shadow-sm",
-          mine
-            ? "rounded-br-sm bg-primary text-primary-foreground"
-            : "rounded-bl-sm bg-secondary"
-        )}
+        className="max-w-[85%] rounded-xl rounded-br-sm p-3 text-sm shadow-sm"
+        style={{ backgroundColor: color, color: "#0d0f14" }}
       >
         {!mine && (
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide opacity-70">
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-wide opacity-75">
             {msg.author}
           </p>
         )}

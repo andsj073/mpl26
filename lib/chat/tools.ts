@@ -30,6 +30,10 @@ export const CHAT_TOOLS: Anthropic.Tool[] = [
         budget_max: { type: "number", description: "EUR per person" },
         duration_min: { type: "number", description: "minuter" },
         address: { type: "string" },
+        lat: { type: "number" },
+        lng: { type: "number" },
+        website_url: { type: "string" },
+        tripadvisor_url: { type: "string" },
       },
       required: ["title", "category"],
     },
@@ -50,6 +54,10 @@ export const CHAT_TOOLS: Anthropic.Tool[] = [
         budget_max: { type: "number" },
         duration_min: { type: "number" },
         address: { type: "string" },
+        lat: { type: "number" },
+        lng: { type: "number" },
+        website_url: { type: "string" },
+        tripadvisor_url: { type: "string" },
       },
       required: ["activity_id"],
     },
@@ -119,6 +127,10 @@ export async function runTool(
           budgetMax: (input.budget_max as number) ?? null,
           durationMin: (input.duration_min as number) ?? null,
           address: (input.address as string) ?? null,
+          lat: (input.lat as number) ?? null,
+          lng: (input.lng as number) ?? null,
+          websiteUrl: (input.website_url as string) ?? null,
+          tripadvisorUrl: (input.tripadvisor_url as string) ?? null,
           addedBy: String(input._author ?? "Chatten"),
         })
         .returning({ id: activities.id, title: activities.title });
@@ -138,6 +150,10 @@ export async function runTool(
       if (input.budget_max !== undefined) patch.budgetMax = input.budget_max;
       if (input.duration_min !== undefined) patch.durationMin = input.duration_min;
       if (input.address !== undefined) patch.address = input.address;
+      if (input.lat !== undefined) patch.lat = input.lat;
+      if (input.lng !== undefined) patch.lng = input.lng;
+      if (input.website_url !== undefined) patch.websiteUrl = input.website_url;
+      if (input.tripadvisor_url !== undefined) patch.tripadvisorUrl = input.tripadvisor_url;
       const [row] = await db
         .update(activities)
         .set(patch)

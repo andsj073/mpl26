@@ -8,6 +8,13 @@
       "when": 1783174291854,
       "tag": "0000_fresh_killraven",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783179904072,
+      "tag": "0001_glamorous_lorna_dane",
+      "breakpoints": true
     }
   ]
 }

@@ -37,6 +37,8 @@ export const activities = pgTable("activities", {
   category: categoryEnum("category").notNull().default("annat"),
   addedBy: text("added_by").notNull(),
   photos: text("photos").array().notNull().default([]),
+  websiteUrl: text("website_url"),
+  tripadvisorUrl: text("tripadvisor_url"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

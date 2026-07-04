@@ -6,7 +6,7 @@ import type { NewActivity } from "./db/schema";
 // null där platsen är oklar eller utspridd.
 
 export const SEED_ACTIVITIES: NewActivity[] = [
-  // ── Hemmaprogram: utan bil, tram 1 från Hôpitaux-Facultés ──
+  // ── Hemmaprogram: utan bil, tram/cykel/till fots från huset ──
   {
     title: "Place de la Comédie",
     description:
@@ -303,8 +303,8 @@ export const SEED_ACTIVITIES: NewActivity[] = [
     budgetMax: 0,
     durationMin: 90,
     address: "Parc de la Rauze, Montpellier",
-    lat: null,
-    lng: null,
+    lat: 43.594,
+    lng: 3.892,
     addedBy: "Andreas",
   },
   {
@@ -331,8 +331,8 @@ export const SEED_ACTIVITIES: NewActivity[] = [
     budgetMax: 0,
     durationMin: 60,
     address: "Lez-cykelvägen, Montpellier",
-    lat: null,
-    lng: null,
+    lat: 43.596,
+    lng: 3.901,
     addedBy: "Andreas",
   },
 
@@ -503,8 +503,8 @@ export const SEED_ACTIVITIES: NewActivity[] = [
     budgetMax: 50,
     durationMin: 180,
     address: "Hotel JOST, Montpellier",
-    lat: null,
-    lng: null,
+    lat: 43.608,
+    lng: 3.877,
     addedBy: "Andreas",
   },
   {
@@ -615,8 +615,8 @@ export const SEED_ACTIVITIES: NewActivity[] = [
     budgetMax: 10,
     durationMin: 240,
     address: "Lez-cykelvägen, Montpellier",
-    lat: null,
-    lng: null,
+    lat: 43.596,
+    lng: 3.901,
     addedBy: "Andreas",
   },
 
@@ -630,9 +630,9 @@ export const SEED_ACTIVITIES: NewActivity[] = [
     budgetMin: 10,
     budgetMax: 20,
     durationMin: 60,
-    address: "12 Rue Nicolas Copernic, Montpellier",
-    lat: null,
-    lng: null,
+    address: "12 Rue Nicolas Copernic, 34000 Montpellier",
+    lat: 43.5951,
+    lng: 3.8991,
     addedBy: "Andreas",
   },
   {
@@ -644,9 +644,9 @@ export const SEED_ACTIVITIES: NewActivity[] = [
     budgetMin: 15,
     budgetMax: 30,
     durationMin: 180,
-    address: "12 Rue Nicolas Copernic, Montpellier",
-    lat: null,
-    lng: null,
+    address: "12 Rue Nicolas Copernic, 34000 Montpellier",
+    lat: 43.5951,
+    lng: 3.8991,
     addedBy: "Andreas",
   },
 ];

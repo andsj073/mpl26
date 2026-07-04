@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FAMILY } from "@/lib/family";
+import { pillStyle } from "@/lib/categories";
 
 const STORAGE_KEY = "mpl26:name";
 
@@ -34,7 +35,8 @@ export function NameGate() {
               localStorage.setItem(STORAGE_KEY, p.name);
               setOpen(false);
             }}
-            className="rounded-xl border border-border bg-card py-3 text-base font-semibold transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+            className="rounded-xl py-3 text-base font-semibold transition-transform focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
+            style={pillStyle(p.color)}
           >
             {p.name}
           </button>

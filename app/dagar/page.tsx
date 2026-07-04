@@ -7,7 +7,8 @@ import {
   type Activity,
   type Day,
 } from "@/lib/db/schema";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, pillStyle } from "@/lib/categories";
+import { personColor } from "@/lib/family";
 import { getTripDays, todayInFrance, tripStatus } from "@/lib/trip";
 import { getForecast, weatherIcon, type DailyWeather } from "@/lib/weather";
 
@@ -127,7 +128,8 @@ export default async function DagarPage() {
                   {meta.participants.map((p) => (
                     <span
                       key={p}
-                      className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium"
+                      className="rounded-full px-2 py-0.5 text-[11px] font-bold"
+                      style={pillStyle(personColor(p))}
                     >
                       {p}
                     </span>
