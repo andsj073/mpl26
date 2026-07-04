@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Montpellier 10–24 juli 2026 · aktivitetsguide</title>
+<title>Montpellier 10–24 juli 2026 · Resedokument</title>
 <style>/**
  * reveal.js 5.2.0
  * https://revealjs.com
@@ -61,6 +61,9 @@ table.bud td:last-child{text-align:right;color:var(--gold);font-weight:700;white
 .navbar{position:fixed;bottom:14px;left:14px;z-index:60;display:flex;gap:8px;}
 .navbar a{display:inline-block;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--ink);background:rgba(22,26,34,.92);border:1px solid #3a4150;border-radius:99px;padding:7px 14px;text-decoration:none;}
 .navbar a:hover{border-color:var(--gold);color:var(--gold);}
+.navbar .navpn{display:none;}
+body.mobile-scroll .navbar .navpn{display:inline-block;flex:0 0 auto !important;font-size:22px !important;line-height:1;padding:10px 16px !important;}
+.cal a{-webkit-tap-highlight-color:transparent;}
 @media (max-width:760px){
   .grid2,.grid3{grid-template-columns:1fr;}
   .cal{grid-template-columns:repeat(2,1fr);}
@@ -107,7 +110,7 @@ body.mobile-scroll .reveal .slides section.present{display:block !important;opac
   <h2>Så använder du det här</h2>
   <div class="grid2">
     <div class="card"><h4>Navigering</h4>
-      <p>Svep eller piltangenter mellan sidor. Knapparna nere till vänster tar dig alltid till <span class="hl">Kalendern</span> (dag för dag) eller <span class="hl">Jag vill ...</span> (efter lust).</p>
+      <p>Piltangenter eller svep byter sida på dator, ‹ ›-knapparna på mobil. Knappraden längst ner tar dig alltid till <span class="hl">Kalendern</span> (dag för dag) eller <span class="hl">Jag vill ...</span> (efter lust).</p>
       <p>ESC ger en filmremsa över alla sidor om du vill skumma.</p></div>
     <div class="card"><h4>Filosofi</h4>
       <p>Varje dag har ett <span class="hl">huvudspår</span> och ett <span class="hl">lataspår</span>. Semester följer inte manus.</p>
@@ -580,7 +583,7 @@ body.mobile-scroll .reveal .slides section.present{display:block !important;opac
 </section>
 
 </div>
-<div class="navbar"><a href="#/kalender">⌂ Kalender</a><a href="#/gora">Jag vill ...</a></div>
+<div class="navbar"><a class="navpn" href="#" onclick="Reveal.prev();return false;">‹</a><a href="#/kalender">⌂ Kalender</a><a href="#/gora">Jag vill ...</a><a class="navpn" href="#" onclick="Reveal.next();return false;">›</a></div>
 </div>
 <script>/*!
  * reveal.js 5.2.0
@@ -606,7 +609,7 @@ Reveal.initialize({
   margin: 0.06,
   minScale: 0.2,
   maxScale: 1.6,
-  touch: true,
+  touch: !mob,
   overview: !mob,
   center: !mob,
   disableLayout: mob
