@@ -83,6 +83,25 @@ export const activityStatus = pgTable(
   (t) => [primaryKey({ columns: [t.activityId, t.person] })]
 );
 
+// Foton laddas upp nedskalade (klientsidan) till Vercel Blob och
+// kopplas till en dag, valfritt även till en aktivitet.
+export const photos = pgTable("photos", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dayDate: date("day_date")
+    .notNull()
+    .references(() => days.date, { onDelete: "cascade" }),
+  activityId: uuid("activity_id").references(() => activities.id, {
+    onDelete: "set null",
+  }),
+  url: text("url").notNull(),
+  uploadedBy: text("uploaded_by").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export type Photo = typeof photos.$inferSelect;
+
 export const messages = pgTable("messages", {
   id: uuid("id").primaryKey().defaultRandom(),
   role: roleEnum("role").notNull(),

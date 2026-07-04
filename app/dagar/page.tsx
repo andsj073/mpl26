@@ -5,8 +5,11 @@ import {
   activityStatus,
   dayActivities,
   days,
+  photos,
   type Day,
+  type Photo,
 } from "@/lib/db/schema";
+import { DayPhotos } from "@/components/day-photos";
 import { DayPlan, type DayPlanEntry } from "@/components/day-plan";
 import { CATEGORIES, pillStyle } from "@/lib/categories";
 import { personColor } from "@/lib/family";
@@ -21,12 +24,13 @@ export default async function DagarPage() {
   const today = todayInFrance();
 
   const planByDay = new Map<string, DayPlanEntry[]>();
+  const photosByDay = new Map<string, Photo[]>();
   const dayMeta = new Map<string, Day>();
   let forecast = new Map<string, DailyWeather>();
 
   if (hasDb()) {
     const db = getDb();
-    const [f, planRows, dayRows, statusRows] = await Promise.all([
+    const [f, planRows, dayRows, statusRows, photoRows] = await Promise.all([
       getForecast(),
       db
         .select({ dayDate: dayActivities.dayDate, activity: activities })
@@ -34,7 +38,13 @@ export default async function DagarPage() {
         .innerJoin(activities, eq(dayActivities.activityId, activities.id)),
       db.select().from(days),
       db.select().from(activityStatus),
+      db.select().from(photos),
     ]);
+    for (const ph of photoRows) {
+      const list = photosByDay.get(ph.dayDate) ?? [];
+      list.push(ph);
+      photosByDay.set(ph.dayDate, list);
+    }
     forecast = f;
     for (const row of planRows) {
       const list = planByDay.get(row.dayDate) ?? [];
@@ -73,6 +83,7 @@ export default async function DagarPage() {
           const w = forecast.get(day.date);
           const isToday = day.date === today;
           const planned = planByDay.get(day.date) ?? [];
+          const dayPhotos = photosByDay.get(day.date) ?? [];
           const meta = dayMeta.get(day.date);
           return (
             <li
@@ -136,6 +147,7 @@ export default async function DagarPage() {
                   {meta.notes}
                 </p>
               )}
+              <DayPhotos dayDate={day.date} photos={dayPhotos} />
             </li>
           );
         })}
