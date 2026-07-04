@@ -64,6 +64,7 @@ export async function buildChatContext(
       db
         .select()
         .from(messages)
+        .where(eq(messages.owner, senderName))
         .orderBy(desc(messages.createdAt))
         .limit(10),
       db.select().from(activityStatus),
@@ -125,7 +126,7 @@ export async function buildChatContext(
 DAGENS DATUM: ${today}. ${whereAreWe}
 VÄDER IDAG: ${fmtWeather(forecast.get(today))}. IMORGON: ${fmtWeather(forecast.get(tomorrow))}.
 
-DEN SOM SKRIVER JUST NU ÄR: ${senderName}. Chatten är gemensam för hela familjen — meddelanden från andra är märkta med avsändarnamn.
+DU CHATTAR MED: ${senderName}. Varje familjemedlem har sin egen privata tråd med dig — men aktiviteter, dagsplanering och statusar är gemensamma och syns för alla.
 
 FAMILJEN:
 ${FAMILY.map((p) => `- ${p.name}${p.age != null ? `, ${p.age} år` : ""}: ${p.profile}`).join("\n")}

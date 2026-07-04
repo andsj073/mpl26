@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   doublePrecision,
   integer,
@@ -39,6 +40,8 @@ export const activities = pgTable("activities", {
   photos: text("photos").array().notNull().default([]),
   websiteUrl: text("website_url"),
   tripadvisorUrl: text("tripadvisor_url"),
+  imageUrl: text("image_url"),
+  featured: boolean("featured").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -85,6 +88,7 @@ export const messages = pgTable("messages", {
   role: roleEnum("role").notNull(),
   content: text("content").notNull(),
   author: text("author"), // familjemedlem för user, null för assistant
+  owner: text("owner"), // vems privata tråd meddelandet tillhör
   dayDate: date("day_date").references(() => days.date, {
     onDelete: "set null",
   }),

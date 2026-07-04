@@ -137,6 +137,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   // ── Hidden gems ──
   {
     title: "Parc Zoologique de Lunaret",
+    featured: true,
     description:
       "Gratis djurpark på 80 hektar, mer som en skog man strosar genom: giraffer, zebror, lejon, vargar. Serre Amazonienne (regnskogskupol) kostar ~7 €. Stängt måndagar. Skuggiga stigar, picknickbord under träden. Nära huset.",
     category: "utflykt",
@@ -151,6 +152,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   },
   {
     title: "Marché des Arceaux",
+    featured: true,
     description:
       "Ekologisk marknad under Saint-Clément-akveduktens bågar, tisdag- och lördagsmorgnar 7–13.30. Hundratalet producenter: ost, chark, honung, oliver, vin. Mycket få turister. Kombinera med Peyrou bredvid.",
     category: "mat",
@@ -223,6 +225,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   // ── Tågutflykter ──
   {
     title: "Sète — Languedocs Venedig",
+    featured: true,
     description:
       "Medelhavets största franska fiskehamn med kanaler. Mont Saint-Clair för panoramautsikt, tielle (bläckfiskpaj) vid hamnen. Tåg från Saint-Roch 20 min, varje halvtimme, ingen bokning. Enklaste logistiken för 7 personer.",
     category: "utflykt",
@@ -251,6 +254,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   },
   {
     title: "Pont du Gard",
+    featured: true,
     description:
       "2000 år gammal romersk akvedukt över Gardon, UNESCO. Gratis för fotgängare, och floden under bron är simbar — ta badkläder. Tåg till Nîmes + buss 168, ca 1 h totalt. Nîmes kan kombineras på hemvägen.",
     category: "utflykt",
@@ -339,6 +343,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   // ── Bilutflykter (5 platser i bilen, 7 personer — pussel) ──
   {
     title: "Saint-Guilhem-le-Désert",
+    featured: true,
     description:
       "UNESCO-by från 800-talet i Hérault-ravinen, en av Frankrikes officiellt vackraste byar. Kullerstensgränder, Abbaye de Gellone (gratis, svalt), bad vid Pont du Diable nedanför. 40 min bil; parkera vid Maison du Grand Site, gratis shuttle. Funkar för alla åldrar.",
     category: "utflykt",
@@ -353,6 +358,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   },
   {
     title: "Lac du Salagou — röd insjö",
+    featured: true,
     description:
       "Spektakulär insjö omgiven av röd lerjord, marslandskap-känsla. Bad, kajak, paddleboard, picknick på röda klippor. Ofta tomt jämfört med havet. 55 min bil; stränderna vid Les Vailhès bäst. Ta med picknick — få restauranger.",
     category: "strand",
@@ -381,6 +387,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   },
   {
     title: "Bambouseraie d'Anduze — bambuskog",
+    featured: true,
     description:
       "Europas enda bambuskogsträdgård (1856): 1 300 bambuvarianter, luftstig 8 m upp, laotisk by, labyrint. 35 hektar, mycket skugga — perfekt i värmen. Helt unikt för en 9-åring, roar vuxna i timmar. 1 h 5 min bil.",
     category: "utflykt",
@@ -465,6 +472,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   },
   {
     title: "Carcassonne — medeltida sagostad",
+    featured: true,
     description:
       "Europas största bevarade medeltida befästa stad: 3 km dubbla murar, 52 torn, UNESCO. Som ett sagoslott — särskilt för Elton. Parkera utanför murarna och gå in för magisk första bild. Ät cassoulet. 1 h 20 min bil, avgång före kl 9.",
     category: "utflykt",
@@ -481,6 +489,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   // ── Ungdomarna: William, Anna, Leja, Leo ──
   {
     title: "Kajak i Hérault-kanjonen",
+    featured: true,
     description:
       "Hyr kajak vid Saint-Guilhem (Canoe Borg/Kayak Tribu, boka morgon) och paddla genom kanjonen: 200 m klippväggar, iskallt vatten, klipphopp längs vägen och flytande bar halvvägs. 4–15 km — 15 km är en riktig dag. Sätter tonen för veckan.",
     category: "sport",
@@ -495,6 +504,7 @@ export const SEED_ACTIVITIES: NewActivity[] = [
   },
   {
     title: "Nonna Gioia rooftop",
+    featured: true,
     description:
       "Italiensk rooftop på hotell JOST: 360°-utsikt, pool, spritz (~12 €), DJ med Mediterranean house i solnedgången. 18.30 för solnedgång, 21 för DJ-set. Smart casual. Endast sommaröppet.",
     category: "bar",

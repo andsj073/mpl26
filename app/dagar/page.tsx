@@ -2,11 +2,12 @@ import { eq } from "drizzle-orm";
 import { getDb, hasDb } from "@/lib/db";
 import {
   activities,
+  activityStatus,
   dayActivities,
   days,
-  type Activity,
   type Day,
 } from "@/lib/db/schema";
+import { DayPlan, type DayPlanEntry } from "@/components/day-plan";
 import { CATEGORIES, pillStyle } from "@/lib/categories";
 import { personColor } from "@/lib/family";
 import { getTripDays, todayInFrance, tripStatus } from "@/lib/trip";
@@ -19,24 +20,32 @@ export default async function DagarPage() {
   const status = tripStatus();
   const today = todayInFrance();
 
-  const planByDay = new Map<string, Activity[]>();
+  const planByDay = new Map<string, DayPlanEntry[]>();
   const dayMeta = new Map<string, Day>();
   let forecast = new Map<string, DailyWeather>();
 
   if (hasDb()) {
     const db = getDb();
-    const [f, planRows, dayRows] = await Promise.all([
+    const [f, planRows, dayRows, statusRows] = await Promise.all([
       getForecast(),
       db
         .select({ dayDate: dayActivities.dayDate, activity: activities })
         .from(dayActivities)
         .innerJoin(activities, eq(dayActivities.activityId, activities.id)),
       db.select().from(days),
+      db.select().from(activityStatus),
     ]);
     forecast = f;
     for (const row of planRows) {
       const list = planByDay.get(row.dayDate) ?? [];
-      list.push(row.activity);
+      list.push({
+        activityId: row.activity.id,
+        title: row.activity.title,
+        categoryColor: CATEGORIES[row.activity.category].color,
+        statuses: statusRows
+          .filter((s) => s.activityId === row.activity.id)
+          .map((s) => ({ person: s.person, status: s.status })),
+      });
       planByDay.set(row.dayDate, list);
     }
     for (const d of dayRows) dayMeta.set(d.date, d);
@@ -99,21 +108,7 @@ export default async function DagarPage() {
                 </p>
               )}
 
-              {planned.length > 0 && (
-                <ul className="mt-2 space-y-1">
-                  {planned.map((a) => (
-                    <li key={a.id} className="flex items-center gap-2 text-sm">
-                      <span
-                        className="size-2 shrink-0 rounded-full"
-                        style={{
-                          backgroundColor: CATEGORIES[a.category].color,
-                        }}
-                      />
-                      {a.title}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {planned.length > 0 && <DayPlan entries={planned} />}
               {planned.length === 0 &&
                 !meta?.notes &&
                 !meta?.participants.length && (

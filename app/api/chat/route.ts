@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   // Persistera user-meddelandet direkt
   await db
     .insert(messagesTable)
-    .values({ role: "user", content, author });
+    .values({ role: "user", content, author, owner: author });
 
   // Historik → konversationsturer; user-meddelanden märks med avsändare
   const turns: Anthropic.MessageParam[] = history.map((m) => ({
@@ -99,6 +99,7 @@ export async function POST(req: Request) {
             role: "assistant",
             content: fullText.trim(),
             author: null,
+            owner: author,
           });
         }
         send({ type: "done" });

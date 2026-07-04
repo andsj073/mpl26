@@ -59,6 +59,8 @@ export const CHAT_TOOLS: Anthropic.Tool[] = [
         lng: { type: "number" },
         website_url: { type: "string" },
         tripadvisor_url: { type: "string" },
+        image_url: { type: "string" },
+        featured: { type: "boolean", description: "Markera som pärla" },
       },
       required: ["activity_id"],
     },
@@ -169,6 +171,8 @@ export async function runTool(
       if (input.lng !== undefined) patch.lng = input.lng;
       if (input.website_url !== undefined) patch.websiteUrl = input.website_url;
       if (input.tripadvisor_url !== undefined) patch.tripadvisorUrl = input.tripadvisor_url;
+      if (input.image_url !== undefined) patch.imageUrl = input.image_url;
+      if (input.featured !== undefined) patch.featured = input.featured;
       const [row] = await db
         .update(activities)
         .set(patch)

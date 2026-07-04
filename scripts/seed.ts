@@ -33,11 +33,15 @@ async function main() {
   for (const seed of SEED_ACTIVITIES) {
     const row = existing.find((a) => a.title === seed.title);
     if (!row) continue;
+    const patch: Record<string, unknown> = {};
     if (row.lat == null && seed.lat != null) {
-      await db
-        .update(activities)
-        .set({ lat: seed.lat, lng: seed.lng, address: seed.address })
-        .where(eq(activities.id, row.id));
+      patch.lat = seed.lat;
+      patch.lng = seed.lng;
+      patch.address = seed.address;
+    }
+    if (seed.featured && !row.featured) patch.featured = true;
+    if (Object.keys(patch).length) {
+      await db.update(activities).set(patch).where(eq(activities.id, row.id));
       synced++;
     }
   }

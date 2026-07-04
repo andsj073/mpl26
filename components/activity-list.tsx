@@ -30,6 +30,7 @@ export function ActivityList({
   const [mineFilter, setMineFilter] = useState<"planerar" | "oplanerade" | null>(
     null
   );
+  const [pearlsOnly, setPearlsOnly] = useState(false);
   const [me, setMe] = useState<string | null>(null);
   const [statuses, setStatuses] = useState<StatusRow[]>(initialStatuses);
 
@@ -69,6 +70,7 @@ export function ActivityList({
   const distFilter = DISTANCE_FILTERS.find((d) => d.key === distance);
   let hiddenNoCoords = 0;
   const shown = items.filter((a) => {
+    if (pearlsOnly && !a.featured) return false;
     if (filter && a.category !== filter) return false;
     if (mineFilter && me) {
       const mine =
@@ -90,6 +92,17 @@ export function ActivityList({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-1.5">
+        <button
+          onClick={() => setPearlsOnly(!pearlsOnly)}
+          className={cn(
+            "rounded-full border px-3 py-1 text-[12px] font-bold uppercase tracking-wider transition-colors",
+            pearlsOnly
+              ? "border-primary bg-primary text-primary-foreground"
+              : "goldnote"
+          )}
+        >
+          ⭐ Pärlor
+        </button>
         {present.map(([key, { label, color }]) => {
           const active = filter === key;
           return (
@@ -268,6 +281,15 @@ function ActivityCard({
       )}
       {open && (
         <div className="mt-2 space-y-2 border-t border-border pt-2 text-sm">
+          {a.imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={a.imageUrl}
+              alt={a.title}
+              loading="lazy"
+              className="max-h-48 w-full rounded-lg object-cover"
+            />
+          )}
           {a.description && (
             <p className="leading-relaxed text-foreground/90">
               {a.description}

@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Lightbulb, MessageCircle } from "lucide-react";
+import { CalendarDays, Home, Lightbulb, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
+  { href: "/", label: "Hem", icon: Home },
   { href: "/dagar", label: "Dagar", icon: CalendarDays },
   { href: "/aktiviteter", label: "Aktiviteter", icon: Lightbulb },
   { href: "/chatt", label: "Chatt", icon: MessageCircle },
@@ -18,7 +19,8 @@ export function BottomNav() {
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
       <div className="mx-auto flex max-w-lg">
         {tabs.map(({ href, label, icon: Icon }) => {
-          const active = pathname.startsWith(href);
+          const active =
+            href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link
               key={href}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
+import ReactMarkdown from "react-markdown";
 import { personColor } from "@/lib/family";
 
 type Msg = {
@@ -28,7 +29,7 @@ export default function ChattPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const { data, mutate } = useSWR<{ messages: Msg[]; dbMissing?: boolean }>(
-    "/api/messages",
+    name ? `/api/messages?me=${encodeURIComponent(name)}` : null,
     fetcher,
     { refreshInterval: 30_000 }
   );
@@ -98,7 +99,7 @@ export default function ChattPage() {
     <div className="flex min-h-[calc(100dvh-7.5rem)] flex-col">
       <header className="flex items-end justify-between gap-2 pb-3">
         <div>
-          <p className="kicker">Hela familjen + AI</p>
+          <p className="kicker">Din tråd med AI:n</p>
           <h1 className="mt-1 text-2xl font-extrabold tracking-tight">
             Chatt
           </h1>
@@ -125,8 +126,9 @@ export default function ChattPage() {
         )}
         {data?.messages.length === 0 && !dbMissing && (
           <p className="pt-10 text-center text-sm text-muted-foreground">
-            Familjens gemensamma tråd. AI:n känner till dagarna, vädret och
-            idébanken — och kan planera in aktiviteter åt er.
+            Din egen tråd med assistenten. Den känner till dagarna, vädret,
+            idébanken och vad alla planerar — och kan ändra i planeringen åt
+            dig.
           </p>
         )}
         {data?.messages.map((m) => (
@@ -222,7 +224,9 @@ function MessageBubble({ msg }: { msg: Msg }) {
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
             Assistenten
           </p>
-          <div className="whitespace-pre-wrap">{msg.content}</div>
+          <div className="chat-md">
+            <ReactMarkdown>{msg.content}</ReactMarkdown>
+          </div>
         </div>
       </div>
     );
