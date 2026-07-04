@@ -130,7 +130,7 @@ export default function ChattPage() {
           </p>
         )}
         {data?.messages.map((m) => (
-          <MessageBubble key={m.id} msg={m} me={name} />
+          <MessageBubble key={m.id} msg={m} />
         ))}
 
         {pending && (
@@ -142,7 +142,6 @@ export default function ChattPage() {
               author: name,
               createdAt: "",
             }}
-            me={name}
           />
         )}
         {toolLabels.map((label, i) => (
@@ -159,7 +158,6 @@ export default function ChattPage() {
               author: null,
               createdAt: "",
             }}
-            me={name}
           />
         )}
         {busy && !streamText && (
@@ -214,7 +212,7 @@ export default function ChattPage() {
   );
 }
 
-function MessageBubble({ msg, me }: { msg: Msg; me: string | null }) {
+function MessageBubble({ msg }: { msg: Msg }) {
   // Assistenten till vänster, alla resenärer till höger —
   // varje resenär i sin egen färg.
   if (msg.role === "assistant") {
@@ -230,18 +228,15 @@ function MessageBubble({ msg, me }: { msg: Msg; me: string | null }) {
     );
   }
   const color = personColor(msg.author);
-  const mine = msg.author === me;
   return (
     <div className="flex justify-end">
       <div
         className="max-w-[85%] rounded-xl rounded-br-sm p-3 text-sm shadow-sm"
         style={{ backgroundColor: color, color: "#0d0f14" }}
       >
-        {!mine && (
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-wide opacity-75">
-            {msg.author}
-          </p>
-        )}
+        <p className="mb-1 text-[11px] font-bold uppercase tracking-wide opacity-75">
+          {msg.author}
+        </p>
         <div className="whitespace-pre-wrap">{msg.content}</div>
       </div>
     </div>
