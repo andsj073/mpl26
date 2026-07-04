@@ -131,6 +131,9 @@
   }
   html {
     @apply font-sans;
+    /* Ett snäpp större bas än webbstandardens 16px — läsbart för alla
+       åldrar i familjen. All rem-baserad text skalar med. */
+    font-size: 17.5px;
   }
 }
 

@@ -93,7 +93,7 @@ export default async function DagarPage() {
               </div>
 
               {day.special && (
-                <p className="goldnote mt-2 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
+                <p className="goldnote mt-2 inline-block rounded-full px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider">
                   {day.special}
                 </p>
               )}
@@ -124,7 +124,7 @@ export default async function DagarPage() {
                   {meta.participants.map((p) => (
                     <span
                       key={p}
-                      className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium"
+                      className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium"
                     >
                       {p}
                     </span>

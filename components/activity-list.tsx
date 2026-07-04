@@ -21,7 +21,7 @@ export function ActivityList({ items }: { items: Activity[] }) {
             <button
               key={key}
               onClick={() => setFilter(active ? null : (key as Category))}
-              className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors"
+              className="rounded-full px-3 py-1 text-[12px] font-bold uppercase tracking-wider transition-colors"
               style={
                 active
                   ? {
@@ -68,7 +68,7 @@ function ActivityCard({ a }: { a: Activity }) {
       <div className="flex items-start justify-between gap-3">
         <p className="font-semibold leading-snug">{a.title}</p>
         <span
-          className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+          className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider"
           style={pillStyle(cat.color)}
         >
           {cat.label}
@@ -94,7 +94,7 @@ function ActivityCard({ a }: { a: Activity }) {
               {a.tags.map((t) => (
                 <span
                   key={t}
-                  className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                  className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
                 >
                   {t}
                 </span>

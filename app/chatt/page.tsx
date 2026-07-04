@@ -218,7 +218,7 @@ function MessageBubble({ msg, me }: { msg: Msg; me: string | null }) {
   if (msg.role === "assistant") {
     return (
       <div className="rounded-xl rounded-bl-sm border border-border bg-card p-3 text-sm shadow-sm">
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
+        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
           Assistenten
         </p>
         <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -237,7 +237,7 @@ function MessageBubble({ msg, me }: { msg: Msg; me: string | null }) {
         )}
       >
         {!mine && (
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide opacity-70">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide opacity-70">
             {msg.author}
           </p>
         )}
