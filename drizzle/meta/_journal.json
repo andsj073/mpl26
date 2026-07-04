@@ -15,6 +15,13 @@
       "when": 1783179904072,
       "tag": "0001_glamorous_lorna_dane",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783181169463,
+      "tag": "0002_cheerful_nehzno",
+      "breakpoints": true
     }
   ]
 }

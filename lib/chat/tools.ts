@@ -1,7 +1,8 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { eq, and } from "drizzle-orm";
 import { getDb } from "@/lib/db";
-import { activities, dayActivities, days } from "@/lib/db/schema";
+import { activities, activityStatus, dayActivities, days } from "@/lib/db/schema";
+import { FAMILY_NAMES } from "@/lib/family";
 
 const CATEGORY_VALUES = [
   "utflykt",
@@ -85,6 +86,20 @@ export const CHAT_TOOLS: Anthropic.Tool[] = [
         activity_id: { type: "string" },
       },
       required: ["day_date", "activity_id"],
+    },
+  },
+  {
+    name: "set_activity_status",
+    description:
+      "Sätt en persons status på en aktivitet: 0 = planerar inte, 1 = planerar att göra, 2 = har gjort. Utelämnas person gäller det den som skriver.",
+    input_schema: {
+      type: "object",
+      properties: {
+        activity_id: { type: "string" },
+        person: { type: "string", description: "Namn ur familjen" },
+        status: { type: "number", enum: [0, 1, 2] },
+      },
+      required: ["activity_id", "status"],
     },
   },
   {
@@ -191,6 +206,40 @@ export async function runTool(
           )
         );
       return { result: "Borttagen från dagen", label: `Tog bort planering ${dayDate}` };
+    }
+    case "set_activity_status": {
+      const activityId = String(input.activity_id);
+      const person = String(input.person ?? input._author);
+      const status = Number(input.status);
+      if (!FAMILY_NAMES.includes(person))
+        return { result: `Okänd person: ${person}`, label: "Statusändring misslyckades" };
+      if (status === 0) {
+        await db
+          .delete(activityStatus)
+          .where(
+            and(
+              eq(activityStatus.activityId, activityId),
+              eq(activityStatus.person, person)
+            )
+          );
+      } else {
+        await db
+          .insert(activityStatus)
+          .values({ activityId, person, status })
+          .onConflictDoUpdate({
+            target: [activityStatus.activityId, activityStatus.person],
+            set: { status },
+          });
+      }
+      const [act] = await db
+        .select({ title: activities.title })
+        .from(activities)
+        .where(eq(activities.id, activityId));
+      const verb = status === 0 ? "planerar inte längre" : status === 1 ? "planerar" : "har gjort";
+      return {
+        result: "Status satt",
+        label: `${person} ${verb}: ${act?.title ?? "aktivitet"}`,
+      };
     }
     case "update_day": {
       const dayDate = String(input.day_date);

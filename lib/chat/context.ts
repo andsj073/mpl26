@@ -2,6 +2,7 @@ import { asc, desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import {
   activities,
+  activityStatus,
   dayActivities,
   days,
   messages,
@@ -47,7 +48,7 @@ export async function buildChatContext(
   const status = tripStatus(today);
   const tripDays = getTripDays();
 
-  const [forecast, allActivities, planRows, dayRows, history] =
+  const [forecast, allActivities, planRows, dayRows, history, statusRows] =
     await Promise.all([
       getForecast(),
       db.select().from(activities).orderBy(asc(activities.title)),
@@ -65,7 +66,24 @@ export async function buildChatContext(
         .from(messages)
         .orderBy(desc(messages.createdAt))
         .limit(10),
+      db.select().from(activityStatus),
     ]);
+
+  const statusByActivity = new Map<string, string>();
+  {
+    const grouped = new Map<string, { planerar: string[]; gjort: string[] }>();
+    for (const r of statusRows) {
+      const g = grouped.get(r.activityId) ?? { planerar: [], gjort: [] };
+      (r.status === 2 ? g.gjort : g.planerar).push(r.person);
+      grouped.set(r.activityId, g);
+    }
+    for (const [id, g] of grouped) {
+      const parts: string[] = [];
+      if (g.planerar.length) parts.push(`planerar: ${g.planerar.join(", ")}`);
+      if (g.gjort.length) parts.push(`har gjort: ${g.gjort.join(", ")}`);
+      statusByActivity.set(id, parts.join(" · "));
+    }
+  }
 
   const tomorrow = new Date(Date.parse(today) + 86_400_000)
     .toISOString()
@@ -116,9 +134,14 @@ RESANS DAGAR (med väder, planering, deltagare):
 ${dayLines}
 
 ALLA AKTIVITETER I IDÉBANKEN (referensmaterial):
-${allActivities.map(fmtActivity).join("\n")}
+${allActivities
+  .map((a) => {
+    const st = statusByActivity.get(a.id);
+    return fmtActivity(a) + (st ? `\n  intresse: ${st}` : "");
+  })
+  .join("\n")}
 
-DINA VERKTYG: du kan lägga till/uppdatera aktiviteter i idébanken, planera in aktiviteter på dagar, ta bort planering och uppdatera en dags deltagare/anteckningar. Använd dem när familjen ber om det eller när det uppenbart hjälper — och berätta alltid kort vad du gjort. Gissa inte id:n: använd id från listan ovan. Ändra inget destruktivt utan att det är tydligt önskat.
+DINA VERKTYG: du kan lägga till/uppdatera aktiviteter i idébanken, planera in aktiviteter på dagar, ta bort planering, uppdatera en dags deltagare/anteckningar och sätta en persons status på en aktivitet (0 = planerar inte, 1 = planerar, 2 = har gjort). Använd dem när familjen ber om det eller när det uppenbart hjälper — och berätta alltid kort vad du gjort. Gissa inte id:n: använd id från listan ovan. Ändra inget destruktivt utan att det är tydligt önskat.
 
 TON: svensk, varm, konkret, kortfattad — mobilskärm. Ge hellre ett tydligt förslag än fem vaga. Tänk på: Elin gillar kultur/vin/mat men inte strapatser; Leo är 17 till 17 juli (alkohol 18+ i Frankrike); Elton är 9; Andreas tränar inför halvmaraton; bilen tar bara 5.`;
 

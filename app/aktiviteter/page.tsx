@@ -1,17 +1,23 @@
 import { asc } from "drizzle-orm";
 import { getDb, hasDb } from "@/lib/db";
-import { activities, type Activity } from "@/lib/db/schema";
+import {
+  activities,
+  activityStatus,
+  type Activity,
+} from "@/lib/db/schema";
 import { ActivityList } from "@/components/activity-list";
 
 export const dynamic = "force-dynamic";
 
 export default async function AktiviteterPage() {
   let items: Activity[] = [];
+  let statuses: (typeof activityStatus.$inferSelect)[] = [];
   if (hasDb()) {
-    items = await getDb()
-      .select()
-      .from(activities)
-      .orderBy(asc(activities.title));
+    const db = getDb();
+    [items, statuses] = await Promise.all([
+      db.select().from(activities).orderBy(asc(activities.title)),
+      db.select().from(activityStatus),
+    ]);
   }
 
   return (
@@ -32,7 +38,7 @@ export default async function AktiviteterPage() {
           </p>
         </div>
       ) : (
-        <ActivityList items={items} />
+        <ActivityList items={items} initialStatuses={statuses} />
       )}
     </div>
   );

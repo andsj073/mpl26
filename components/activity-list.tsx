@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExternalLink, MapPin } from "lucide-react";
 import type { Activity } from "@/lib/db/schema";
 import { CATEGORIES, pillStyle, type Category } from "@/lib/categories";
 import { DISTANCE_FILTERS, kmFromHome } from "@/lib/geo";
+import { personColor } from "@/lib/family";
 import { cn } from "@/lib/utils";
+
+type StatusRow = { activityId: string; person: string; status: number };
 
 function mapsUrl(a: Activity): string {
   const q =
@@ -15,9 +18,49 @@ function mapsUrl(a: Activity): string {
   return `https://www.google.com/maps/search/?api=1&query=${q}`;
 }
 
-export function ActivityList({ items }: { items: Activity[] }) {
+export function ActivityList({
+  items,
+  initialStatuses,
+}: {
+  items: Activity[];
+  initialStatuses: StatusRow[];
+}) {
   const [filter, setFilter] = useState<Category | null>(null);
   const [distance, setDistance] = useState<string | null>(null);
+  const [mineFilter, setMineFilter] = useState<"planerar" | "oplanerade" | null>(
+    null
+  );
+  const [me, setMe] = useState<string | null>(null);
+  const [statuses, setStatuses] = useState<StatusRow[]>(initialStatuses);
+
+  useEffect(() => {
+    setMe(localStorage.getItem("mpl26:name"));
+  }, []);
+
+  async function cycleStatus(activityId: string) {
+    if (!me) return;
+    const current =
+      statuses.find((s) => s.activityId === activityId && s.person === me)
+        ?.status ?? 0;
+    const next = (current + 1) % 3;
+
+    // Optimistisk uppdatering, backas vid fel
+    const prev = statuses;
+    setStatuses((rows) => {
+      const rest = rows.filter(
+        (s) => !(s.activityId === activityId && s.person === me)
+      );
+      return next === 0
+        ? rest
+        : [...rest, { activityId, person: me, status: next }];
+    });
+    const res = await fetch("/api/activity-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ activityId, person: me, status: next }),
+    }).catch(() => null);
+    if (!res?.ok) setStatuses(prev);
+  }
 
   const present = Object.entries(CATEGORIES).filter(([key]) =>
     items.some((a) => a.category === key)
@@ -27,6 +70,13 @@ export function ActivityList({ items }: { items: Activity[] }) {
   let hiddenNoCoords = 0;
   const shown = items.filter((a) => {
     if (filter && a.category !== filter) return false;
+    if (mineFilter && me) {
+      const mine =
+        statuses.find((s) => s.activityId === a.id && s.person === me)
+          ?.status ?? 0;
+      if (mineFilter === "planerar" && mine !== 1) return false;
+      if (mineFilter === "oplanerade" && mine !== 0) return false;
+    }
     if (distFilter) {
       if (a.lat == null || a.lng == null) {
         hiddenNoCoords++;
@@ -86,9 +136,45 @@ export function ActivityList({ items }: { items: Activity[] }) {
         })}
       </div>
 
+      {me && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
+            Mina:
+          </span>
+          {(
+            [
+              { key: "planerar", label: "Jag planerar" },
+              { key: "oplanerade", label: "Oplanerade" },
+            ] as const
+          ).map(({ key, label }) => {
+            const active = mineFilter === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setMineFilter(active ? null : key)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-[12px] font-bold tracking-wider transition-colors",
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-muted-foreground"
+                )}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <ul className="space-y-2.5">
         {shown.map((a) => (
-          <ActivityCard key={a.id} a={a} />
+          <ActivityCard
+            key={a.id}
+            a={a}
+            statuses={statuses.filter((s) => s.activityId === a.id)}
+            me={me}
+            onCycle={() => cycleStatus(a.id)}
+          />
         ))}
       </ul>
       {shown.length === 0 && (
@@ -106,9 +192,38 @@ export function ActivityList({ items }: { items: Activity[] }) {
   );
 }
 
-function ActivityCard({ a }: { a: Activity }) {
+/** Chip för en persons status: tonad = planerar, solid = har gjort. */
+function StatusChip({ person, status }: { person: string; status: number }) {
+  const color = personColor(person);
+  const style =
+    status === 2
+      ? { backgroundColor: color, color: "#0d0f14", border: `1px solid ${color}` }
+      : pillStyle(color);
+  return (
+    <span
+      className="rounded-full px-2 py-0.5 text-[11px] font-bold"
+      style={style}
+    >
+      {person}
+      {status === 2 && " ✓"}
+    </span>
+  );
+}
+
+function ActivityCard({
+  a,
+  statuses,
+  me,
+  onCycle,
+}: {
+  a: Activity;
+  statuses: StatusRow[];
+  me: string | null;
+  onCycle: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const cat = CATEGORIES[a.category];
+  const myStatus = statuses.find((s) => s.person === me)?.status ?? 0;
 
   const meta: string[] = [];
   if (a.lat != null && a.lng != null) {
@@ -142,6 +257,15 @@ function ActivityCard({ a }: { a: Activity }) {
           {meta.join(" · ")}
         </p>
       )}
+      {statuses.length > 0 && (
+        <p className="mt-2 flex flex-wrap gap-1">
+          {[...statuses]
+            .sort((x, y) => y.status - x.status || x.person.localeCompare(y.person))
+            .map((s) => (
+              <StatusChip key={s.person} person={s.person} status={s.status} />
+            ))}
+        </p>
+      )}
       {open && (
         <div className="mt-2 space-y-2 border-t border-border pt-2 text-sm">
           {a.description && (
@@ -151,6 +275,30 @@ function ActivityCard({ a }: { a: Activity }) {
           )}
           {a.address && (
             <p className="text-xs text-muted-foreground">{a.address}</p>
+          )}
+          {me && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onCycle();
+              }}
+              className="w-full rounded-lg border py-2 text-sm font-bold transition-colors"
+              style={
+                myStatus === 0
+                  ? { borderColor: "var(--border)", color: "var(--muted-foreground)" }
+                  : myStatus === 1
+                    ? pillStyle(personColor(me))
+                    : {
+                        backgroundColor: personColor(me),
+                        color: "#0d0f14",
+                        border: `1px solid ${personColor(me)}`,
+                      }
+              }
+            >
+              {myStatus === 0 && "Planerar inte — tryck om du vill göra det här"}
+              {myStatus === 1 && `${me} planerar att göra det här`}
+              {myStatus === 2 && `${me} har gjort det här ✓`}
+            </button>
           )}
           <p
             className="flex flex-wrap gap-3 pt-0.5"
