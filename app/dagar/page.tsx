@@ -53,7 +53,9 @@ export default async function DagarPage() {
         title: row.activity.title,
         categoryColor: CATEGORIES[row.activity.category].color,
         statuses: statusRows
-          .filter((s) => s.activityId === row.activity.id)
+          .filter(
+            (s) => s.activityId === row.activity.id && s.dayDate === row.dayDate
+          )
           .map((s) => ({ person: s.person, status: s.status })),
       });
       planByDay.set(row.dayDate, list);
@@ -119,7 +121,9 @@ export default async function DagarPage() {
                 </p>
               )}
 
-              {planned.length > 0 && <DayPlan entries={planned} />}
+              {planned.length > 0 && (
+                <DayPlan dayDate={day.date} entries={planned} />
+              )}
               {planned.length === 0 &&
                 !meta?.notes &&
                 !meta?.participants.length && (

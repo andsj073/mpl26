@@ -2,11 +2,79 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 config();
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getDb } from "../lib/db";
-import { activities, days } from "../lib/db/schema";
+import {
+  activities,
+  activityStatus,
+  dayActivities,
+  days,
+} from "../lib/db/schema";
 import { SEED_ACTIVITIES } from "../lib/seed-data";
-import { getTripDays } from "../lib/trip";
+import { getTripDays, TRIP_START } from "../lib/trip";
+
+/** Smoke test för dagbunden status: "Ankomst" på 10 juli med alla som
+ *  landar den dagen inplanerade. Idempotent. */
+async function ensureArrival(db: ReturnType<typeof getDb>) {
+  const title = "Ankomst till Montpellier";
+  let [arrival] = await db
+    .select()
+    .from(activities)
+    .where(eq(activities.title, title));
+  if (!arrival) {
+    [arrival] = await db
+      .insert(activities)
+      .values({
+        title,
+        description:
+          "Flyg landar 14.00, hämtning av nycklar och installation på 12 Rue Nicolas Copernic. Middag hemma, planera veckan, lugn start.",
+        category: "annat",
+        tags: ["resa"],
+        address: "12 Rue Nicolas Copernic, 34000 Montpellier",
+        lat: 43.5951,
+        lng: 3.8991,
+        addedBy: "Andreas",
+      })
+      .returning();
+  }
+  await db
+    .insert(dayActivities)
+    .values({ dayDate: TRIP_START, activityId: arrival.id })
+    .onConflictDoNothing();
+  // Alla utom Viktor landar den 10:e
+  const arrivers = [
+    "Andreas",
+    "Elin",
+    "William",
+    "Anna",
+    "Leja",
+    "Leo",
+    "Elton",
+  ];
+  for (const person of arrivers) {
+    const [existing] = await db
+      .select()
+      .from(activityStatus)
+      .where(
+        and(
+          eq(activityStatus.activityId, arrival.id),
+          eq(activityStatus.person, person)
+        )
+      );
+    if (!existing) {
+      await db
+        .insert(activityStatus)
+        .values({
+          activityId: arrival.id,
+          person,
+          status: 1,
+          dayDate: TRIP_START,
+        })
+        .onConflictDoNothing();
+    }
+  }
+  console.log("✓ Ankomst-aktiviteten säkrad på 10 juli");
+}
 
 async function main() {
   if (!process.env.DATABASE_URL) {
@@ -24,8 +92,10 @@ async function main() {
   if (existing.length === 0) {
     await db.insert(activities).values(SEED_ACTIVITIES);
     console.log(`✓ ${SEED_ACTIVITIES.length} aktiviteter seedade`);
+    await ensureArrival(db);
     return;
   }
+  await ensureArrival(db);
 
   // Synk-pass: befintliga rader som matchar seed på titel får
   // koordinater/adress ifyllda om de saknas (körs vid varje build).

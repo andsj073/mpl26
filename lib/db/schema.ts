@@ -70,7 +70,8 @@ export const dayActivities = pgTable(
   (t) => [primaryKey({ columns: [t.dayDate, t.activityId] })]
 );
 
-// Per person-status på en aktivitet. Ingen rad = 0 (planerar inte).
+// Per person-status på en aktivitet, knuten till en dag.
+// Ingen rad = 0 (planerar inte).
 export const activityStatus = pgTable(
   "activity_status",
   {
@@ -79,6 +80,9 @@ export const activityStatus = pgTable(
       .references(() => activities.id, { onDelete: "cascade" }),
     person: text("person").notNull(),
     status: integer("status").notNull(), // 1 = planerar, 2 = har gjort
+    dayDate: date("day_date").references(() => days.date, {
+      onDelete: "set null",
+    }),
   },
   (t) => [primaryKey({ columns: [t.activityId, t.person] })]
 );

@@ -93,13 +93,14 @@ export const CHAT_TOOLS: Anthropic.Tool[] = [
   {
     name: "set_activity_status",
     description:
-      "Sätt en persons status på en aktivitet: 0 = planerar inte, 1 = planerar att göra, 2 = har gjort. Utelämnas person gäller det den som skriver.",
+      "Sätt en persons status på en aktivitet: 0 = planerar inte, 1 = planerar att göra, 2 = har gjort. Status 1/2 kräver day_date — vilken dag personen planerar/gjorde den. Utelämnas person gäller det den som skriver. Aktiviteten läggs automatiskt på dagen.",
     input_schema: {
       type: "object",
       properties: {
         activity_id: { type: "string" },
         person: { type: "string", description: "Namn ur familjen" },
         status: { type: "number", enum: [0, 1, 2] },
+        day_date: { type: "string", description: "YYYY-MM-DD, krävs för status 1/2" },
       },
       required: ["activity_id", "status"],
     },
@@ -215,8 +216,14 @@ export async function runTool(
       const activityId = String(input.activity_id);
       const person = String(input.person ?? input._author);
       const status = Number(input.status);
+      const dayDate = input.day_date ? String(input.day_date) : null;
       if (!FAMILY_NAMES.includes(person))
         return { result: `Okänd person: ${person}`, label: "Statusändring misslyckades" };
+      if (status > 0 && !dayDate)
+        return {
+          result: "day_date krävs för status 1/2 — fråga vilken dag det gäller.",
+          label: "Statusändring behöver en dag",
+        };
       if (status === 0) {
         await db
           .delete(activityStatus)
@@ -227,12 +234,17 @@ export async function runTool(
             )
           );
       } else {
+        await db.insert(days).values({ date: dayDate! }).onConflictDoNothing();
+        await db
+          .insert(dayActivities)
+          .values({ dayDate: dayDate!, activityId })
+          .onConflictDoNothing();
         await db
           .insert(activityStatus)
-          .values({ activityId, person, status })
+          .values({ activityId, person, status, dayDate })
           .onConflictDoUpdate({
             target: [activityStatus.activityId, activityStatus.person],
-            set: { status },
+            set: { status, dayDate },
           });
       }
       const [act] = await db

@@ -1,0 +1,2 @@
+ALTER TABLE "activity_status" ADD COLUMN "day_date" date;--> statement-breakpoint
+ALTER TABLE "activity_status" ADD CONSTRAINT "activity_status_day_date_days_date_fk" FOREIGN KEY ("day_date") REFERENCES "public"."days"("date") ON DELETE set null ON UPDATE no action;

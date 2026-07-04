@@ -75,7 +75,8 @@ export async function buildChatContext(
     const grouped = new Map<string, { planerar: string[]; gjort: string[] }>();
     for (const r of statusRows) {
       const g = grouped.get(r.activityId) ?? { planerar: [], gjort: [] };
-      (r.status === 2 ? g.gjort : g.planerar).push(r.person);
+      const who = r.dayDate ? `${r.person} (${r.dayDate.slice(8)}/7)` : r.person;
+      (r.status === 2 ? g.gjort : g.planerar).push(who);
       grouped.set(r.activityId, g);
     }
     for (const [id, g] of grouped) {

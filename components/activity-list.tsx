@@ -5,10 +5,16 @@ import { ExternalLink, MapPin } from "lucide-react";
 import type { Activity } from "@/lib/db/schema";
 import { CATEGORIES, pillStyle, type Category } from "@/lib/categories";
 import { DISTANCE_FILTERS, kmFromHome } from "@/lib/geo";
+import { getTripDays } from "@/lib/trip";
 import { personColor } from "@/lib/family";
 import { cn } from "@/lib/utils";
 
-type StatusRow = { activityId: string; person: string; status: number };
+type StatusRow = {
+  activityId: string;
+  person: string;
+  status: number;
+  dayDate: string | null;
+};
 
 function mapsUrl(a: Activity): string {
   const q =
@@ -38,27 +44,26 @@ export function ActivityList({
     setMe(localStorage.getItem("mpl26:name"));
   }, []);
 
-  async function cycleStatus(activityId: string) {
+  async function setStatus(
+    activityId: string,
+    status: number,
+    dayDate: string | null
+  ) {
     if (!me) return;
-    const current =
-      statuses.find((s) => s.activityId === activityId && s.person === me)
-        ?.status ?? 0;
-    const next = (current + 1) % 3;
-
     // Optimistisk uppdatering, backas vid fel
     const prev = statuses;
     setStatuses((rows) => {
       const rest = rows.filter(
         (s) => !(s.activityId === activityId && s.person === me)
       );
-      return next === 0
+      return status === 0
         ? rest
-        : [...rest, { activityId, person: me, status: next }];
+        : [...rest, { activityId, person: me, status, dayDate }];
     });
     const res = await fetch("/api/activity-status", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ activityId, person: me, status: next }),
+      body: JSON.stringify({ activityId, person: me, status, dayDate }),
     }).catch(() => null);
     if (!res?.ok) setStatuses(prev);
   }
@@ -186,7 +191,7 @@ export function ActivityList({
             a={a}
             statuses={statuses.filter((s) => s.activityId === a.id)}
             me={me}
-            onCycle={() => cycleStatus(a.id)}
+            onSet={(status, dayDate) => setStatus(a.id, status, dayDate)}
           />
         ))}
       </ul>
@@ -223,20 +228,30 @@ function StatusChip({ person, status }: { person: string; status: number }) {
   );
 }
 
+const TRIP_DAYS = getTripDays();
+
+function fmtDay(date: string | null): string {
+  if (!date) return "";
+  const d = TRIP_DAYS.find((t) => t.date === date);
+  return d ? `${d.weekday.slice(0, 3)} ${d.label.replace(" juli", "/7")}` : date;
+}
+
 function ActivityCard({
   a,
   statuses,
   me,
-  onCycle,
+  onSet,
 }: {
   a: Activity;
   statuses: StatusRow[];
   me: string | null;
-  onCycle: () => void;
+  onSet: (status: number, dayDate: string | null) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [choosing, setChoosing] = useState(false);
   const cat = CATEGORIES[a.category];
-  const myStatus = statuses.find((s) => s.person === me)?.status ?? 0;
+  const myRow = statuses.find((s) => s.person === me);
+  const myStatus = myRow?.status ?? 0;
 
   const meta: string[] = [];
   if (a.lat != null && a.lng != null) {
@@ -299,28 +314,69 @@ function ActivityCard({
             <p className="text-xs text-muted-foreground">{a.address}</p>
           )}
           {me && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onCycle();
-              }}
-              className="w-full rounded-lg border py-2 text-sm font-bold transition-colors"
-              style={
-                myStatus === 0
-                  ? { borderColor: "var(--border)", color: "var(--muted-foreground)" }
-                  : myStatus === 1
-                    ? pillStyle(personColor(me))
-                    : {
-                        backgroundColor: personColor(me),
-                        color: "#0d0f14",
-                        border: `1px solid ${personColor(me)}`,
-                      }
-              }
-            >
-              {myStatus === 0 && "Planerar inte — tryck om du vill göra det här"}
-              {myStatus === 1 && `${me} planerar att göra det här`}
-              {myStatus === 2 && `${me} har gjort det här ✓`}
-            </button>
+            <div onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => {
+                  if (myStatus === 2) {
+                    onSet(0, null);
+                    setChoosing(false);
+                  } else {
+                    setChoosing(!choosing);
+                  }
+                }}
+                className="w-full rounded-lg border py-2 text-sm font-bold transition-colors"
+                style={
+                  myStatus === 0
+                    ? { borderColor: "var(--border)", color: "var(--muted-foreground)" }
+                    : myStatus === 1
+                      ? pillStyle(personColor(me))
+                      : {
+                          backgroundColor: personColor(me),
+                          color: "#0d0f14",
+                          border: `1px solid ${personColor(me)}`,
+                        }
+                }
+              >
+                {myStatus === 0 && "Planerar inte — tryck för att välja dag"}
+                {myStatus === 1 &&
+                  `${me} planerar ${fmtDay(myRow?.dayDate ?? null)} — tryck när du gjort det`}
+                {myStatus === 2 &&
+                  `${me} har gjort det här ✓ — tryck för att nollställa`}
+              </button>
+              {choosing && (
+                <div className="mt-1.5 rounded-lg border border-border bg-popover p-2">
+                  <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {myStatus === 0
+                      ? "Vilken dag planerar du det?"
+                      : "Vilken dag gjorde du det?"}
+                  </p>
+                  <div className="grid grid-cols-5 gap-1">
+                    {TRIP_DAYS.map((d) => {
+                      const selected = myRow?.dayDate === d.date;
+                      return (
+                        <button
+                          key={d.date}
+                          onClick={() => {
+                            onSet(myStatus === 0 ? 1 : 2, d.date);
+                            setChoosing(false);
+                          }}
+                          className={cn(
+                            "rounded-md border px-1 py-1.5 text-center text-[11px] font-bold leading-tight",
+                            selected
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-card"
+                          )}
+                        >
+                          {d.weekday.slice(0, 3)}
+                          <br />
+                          {d.dayNumber + 9}/7
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
           <p
             className="flex flex-wrap gap-3 pt-0.5"

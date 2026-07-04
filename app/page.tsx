@@ -51,9 +51,29 @@ export default async function DashboardPage() {
     activityCount = actCount.length;
   }
 
-  const highlightDays = [today, tomorrow]
-    .map((date) => tripDays.find((d) => d.date === date))
-    .filter(Boolean);
+  const weekdayFmt = new Intl.DateTimeFormat("sv-SE", {
+    weekday: "long",
+    timeZone: "Europe/Paris",
+  });
+  const labelFmt = new Intl.DateTimeFormat("sv-SE", {
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/Paris",
+  });
+  const highlightDays = [
+    { date: today, tag: "idag" },
+    { date: tomorrow, tag: "imorgon" },
+  ].map(({ date, tag }) => {
+    const trip = tripDays.find((d) => d.date === date);
+    const d = new Date(`${date}T12:00:00Z`);
+    return {
+      date,
+      tag,
+      weekday: trip?.weekday ?? weekdayFmt.format(d),
+      label: trip?.label ?? labelFmt.format(d),
+      special: trip?.special,
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -75,67 +95,66 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {highlightDays.length > 0 && (
-        <section className="space-y-2.5">
-          <h2 className="kicker">Idag & imorgon</h2>
-          {highlightDays.map((day) => {
-            const w = forecast.get(day!.date);
-            const planned = planByDay.get(day!.date) ?? [];
-            const notes = notesByDay.get(day!.date);
-            return (
-              <Link
-                key={day!.date}
-                href="/dagar"
-                className="block rounded-xl border border-border bg-card p-3 shadow-sm"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="daylabel">
-                    {day!.weekday} {day!.label}
+      <section className="space-y-2.5">
+        <h2 className="kicker">Idag & imorgon</h2>
+        {highlightDays.map((day) => {
+          const w = forecast.get(day.date);
+          const planned = planByDay.get(day.date) ?? [];
+          const notes = notesByDay.get(day.date);
+          return (
+            <Link
+              key={day.date}
+              href="/dagar"
+              className="block rounded-xl border border-border bg-card p-3 shadow-sm"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="daylabel">
+                  {day.weekday} {day.label} · {day.tag}
+                </span>
+                {w && (
+                  <span className="text-sm">
+                    {weatherIcon(w.weathercode)}{" "}
+                    <span className="font-semibold">{w.tempMax}°</span>
+                    <span className="text-muted-foreground"> / {w.tempMin}°</span>
                   </span>
-                  {w && (
-                    <span className="text-sm">
-                      {weatherIcon(w.weathercode)}{" "}
-                      <span className="font-semibold">{w.tempMax}°</span>
-                    </span>
-                  )}
-                </div>
-                {day!.special && (
-                  <p className="goldnote mt-2 inline-block rounded-full px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider">
-                    {day!.special}
+                )}
+              </div>
+              {day.special && (
+                <p className="goldnote mt-2 inline-block rounded-full px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider">
+                  {day.special}
+                </p>
+              )}
+              {planned.length > 0 ? (
+                <ul className="mt-2 space-y-1">
+                  {planned.map((p) => (
+                    <li
+                      key={p.title}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <span
+                        className="size-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: p.color }}
+                      />
+                      {p.title}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                !notes && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Inget planerat.
                   </p>
-                )}
-                {planned.length > 0 ? (
-                  <ul className="mt-2 space-y-1">
-                    {planned.map((p) => (
-                      <li
-                        key={p.title}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <span
-                          className="size-2 shrink-0 rounded-full"
-                          style={{ backgroundColor: p.color }}
-                        />
-                        {p.title}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  !notes && (
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Inget planerat — fråga chatten om förslag!
-                    </p>
-                  )
-                )}
-                {notes && (
-                  <p className="mt-2 rounded-md bg-muted p-2 text-xs text-muted-foreground">
-                    {notes}
-                  </p>
-                )}
-              </Link>
-            );
-          })}
-        </section>
-      )}
+                )
+              )}
+              {notes && (
+                <p className="mt-2 rounded-md bg-muted p-2 text-xs text-muted-foreground">
+                  {notes}
+                </p>
+              )}
+            </Link>
+          );
+        })}
+      </section>
 
       {scoreboard.length > 0 && (
         <section className="space-y-2.5">
@@ -169,10 +188,14 @@ export default async function DashboardPage() {
             ))}
           </ol>
           <p className="text-xs text-muted-foreground">
-            Poäng: gjort ×3 · tillagd aktivitet ×2 · planerar ×1 · flitig
-            chattare +2. Badges: ✍️ bidragit · 🧭 3+ tillagda · 📅 3+
-            planerade · ✅ första gjorda · 🏆 5+ gjorda · 🚗 gjort &gt;50 km
-            bort · ⭐ gjort en pärla · 💬 10+ meddelanden.
+            <strong className="font-bold text-foreground">Poäng:</strong>{" "}
+            gjort ×3 · tillagd aktivitet ×2 · planerar ×1 · flitig chattare
+            +2.
+            <br />
+            <strong className="font-bold text-foreground">Badges:</strong>{" "}
+            ✍️ bidragit · 🧭 3+ tillagda · 📅 3+ planerade · ✅ första gjorda
+            · 🏆 5+ gjorda · 🚗 gjort &gt;50 km bort · ⭐ gjort en pärla · 💬
+            10+ meddelanden.
           </p>
         </section>
       )}
