@@ -31,8 +31,9 @@ Egen bil på plats: 5 platser, 7 personer, alltid ett pussel.
 - Vercel hosting, GitHub Actions inte nödvändigt (Vercel deployar på push)
 - Persistens: Vercel KV eller Vercel Postgres, ditt val, motivera
 - Anthropic API via @anthropic-ai/sdk, modell claude-sonnet-4-5 för chat
-- Ingen auth. Familjen får en delad länk. Namn väljs från dropdown vid 
-  första besök, sparas i localStorage.
+- Lättviktsauth: ett delat familjelösenord (env APP_PASSWORD) via 
+  middleware + httpOnly-cookie, giltig 1 år per enhet. Namn väljs från 
+  dropdown vid första besök, sparas i localStorage.
 - Mobil först. Poängen är att appen används från soffan i huset i 
   Montpellier och på tåget till Sète, inte på en 27-tums skärm.
 

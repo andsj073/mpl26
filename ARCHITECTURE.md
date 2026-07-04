@@ -1,8 +1,10 @@
 # Arkitektur — mpl26
 
 Next.js 15 (App Router, TypeScript, Tailwind, shadcn/ui) på Vercel.
-Mobil först. Ingen auth — delad länk, namn väljs via dropdown och sparas
-i localStorage (`mpl26:name`).
+Mobil först. Lättviktsauth: delat familjelösenord (`APP_PASSWORD`) —
+`middleware.ts` kräver en httpOnly-cookie (SHA-256-token, 1 år) och
+skickar annars till `/las`; API:er svarar 401. Namn väljs via dropdown
+och sparas i localStorage (`mpl26:name`).
 
 ## Databas: Postgres (Neon via Vercel Marketplace)
 
