@@ -108,16 +108,11 @@ export const CHAT_TOOLS: Anthropic.Tool[] = [
   {
     name: "update_day",
     description:
-      "Uppdatera en dags deltagare (vilka i familjen som är med) och/eller anteckningar.",
+      "Uppdatera en dags fria anteckning. Vilka som deltar styrs inte här — det följer av personers status på dagens aktiviteter (set_activity_status).",
     input_schema: {
       type: "object",
       properties: {
         day_date: { type: "string" },
-        participants: {
-          type: "array",
-          items: { type: "string" },
-          description: "Namn ur familjen; ersätter hela listan",
-        },
         notes: { type: "string", description: "Ersätter dagens anteckning" },
       },
       required: ["day_date"],
@@ -261,7 +256,6 @@ export async function runTool(
       const dayDate = String(input.day_date);
       await db.insert(days).values({ date: dayDate }).onConflictDoNothing();
       const patch: Record<string, unknown> = {};
-      if (input.participants !== undefined) patch.participants = input.participants;
       if (input.notes !== undefined) patch.notes = input.notes;
       if (Object.keys(patch).length)
         await db.update(days).set(patch).where(eq(days.date, dayDate));

@@ -115,8 +115,6 @@ export async function buildChatContext(
       ];
       if (planned.length)
         parts.push(`  planerat: ${planned.map((a) => a.title).join("; ")}`);
-      if (meta?.participants.length)
-        parts.push(`  med: ${meta.participants.join(", ")}`);
       if (meta?.notes) parts.push(`  anteckningar: ${meta.notes}`);
       return parts.join("\n");
     })
@@ -143,7 +141,7 @@ ${allActivities
   })
   .join("\n")}
 
-DINA VERKTYG: du kan lägga till/uppdatera aktiviteter i idébanken, planera in aktiviteter på dagar, ta bort planering, uppdatera en dags deltagare/anteckningar och sätta en persons status på en aktivitet (0 = planerar inte, 1 = planerar, 2 = har gjort). Använd dem när familjen ber om det eller när det uppenbart hjälper — och berätta alltid kort vad du gjort. Gissa inte id:n: använd id från listan ovan. Ändra inget destruktivt utan att det är tydligt önskat.
+DINA VERKTYG: du kan lägga till/uppdatera aktiviteter i idébanken, planera in aktiviteter på dagar, ta bort planering, uppdatera en dags anteckning och sätta en persons status på en aktivitet (0 = planerar inte, 1 = planerar, 2 = har gjort). Använd dem när familjen ber om det eller när det uppenbart hjälper — och berätta alltid kort vad du gjort. Gissa inte id:n: använd id från listan ovan. Ändra inget destruktivt utan att det är tydligt önskat.
 
 TON: svensk, varm, konkret, kortfattad — mobilskärm. Ge hellre ett tydligt förslag än fem vaga. Tänk på: Elin gillar kultur/vin/mat men inte strapatser; Leo är 17 till 17 juli (alkohol 18+ i Frankrike); Elton är 9; Andreas tränar inför halvmaraton; bilen tar bara 5.`;
 

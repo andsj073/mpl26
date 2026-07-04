@@ -3,10 +3,15 @@ import type { getDb } from "@/lib/db";
 import { activities, activityStatus, messages } from "@/lib/db/schema";
 import { FAMILY } from "@/lib/family";
 import { kmFromHome } from "@/lib/geo";
+import { SEED_ACTIVITIES } from "@/lib/seed-data";
 
-// Seedningen gjordes 4 juli 2026 med addedBy "Andreas" — bara aktiviteter
-// tillagda därefter räknas som personliga bidrag.
-const SEED_CUTOFF = new Date("2026-07-05T00:00:00Z");
+// Seedade aktiviteter (och Ankomst-smoketesten) räknas inte som
+// personliga bidrag — matchas på titel så att t.ex. Elins tillägg
+// samma dag som seedningen ändå ger poäng.
+const SEED_TITLES = new Set([
+  ...SEED_ACTIVITIES.map((a) => a.title),
+  "Ankomst till Montpellier",
+]);
 
 export type Badge = { emoji: string; label: string };
 
@@ -40,7 +45,7 @@ export async function computeScoreboard(
 
   return FAMILY.map((p) => {
     const added = acts.filter(
-      (a) => a.addedBy === p.name && a.createdAt > SEED_CUTOFF
+      (a) => a.addedBy === p.name && !SEED_TITLES.has(a.title)
     ).length;
     const mine = statuses.filter((s) => s.person === p.name);
     const planning = mine.filter((s) => s.status === 1).length;

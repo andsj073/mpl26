@@ -10,9 +10,14 @@ import {
   type Photo,
 } from "@/lib/db/schema";
 import { DayPhotos } from "@/components/day-photos";
-import { DayPlan, type DayPlanEntry } from "@/components/day-plan";
-import { CATEGORIES, pillStyle } from "@/lib/categories";
-import { personColor } from "@/lib/family";
+import Link from "next/link";
+import { MessageCircle } from "lucide-react";
+import {
+  DayPlan,
+  type ActivityOption,
+  type DayPlanEntry,
+} from "@/components/day-plan";
+import { CATEGORIES } from "@/lib/categories";
 import { getTripDays, todayInFrance, tripStatus } from "@/lib/trip";
 import { getForecast, weatherIcon, type DailyWeather } from "@/lib/weather";
 
@@ -28,18 +33,28 @@ export default async function DagarPage() {
   const dayMeta = new Map<string, Day>();
   let forecast = new Map<string, DailyWeather>();
 
+  let allOptions: ActivityOption[] = [];
   if (hasDb()) {
     const db = getDb();
-    const [f, planRows, dayRows, statusRows, photoRows] = await Promise.all([
-      getForecast(),
-      db
-        .select({ dayDate: dayActivities.dayDate, activity: activities })
-        .from(dayActivities)
-        .innerJoin(activities, eq(dayActivities.activityId, activities.id)),
-      db.select().from(days),
-      db.select().from(activityStatus),
-      db.select().from(photos),
-    ]);
+    const [f, planRows, dayRows, statusRows, photoRows, allActs] =
+      await Promise.all([
+        getForecast(),
+        db
+          .select({ dayDate: dayActivities.dayDate, activity: activities })
+          .from(dayActivities)
+          .innerJoin(activities, eq(dayActivities.activityId, activities.id)),
+        db.select().from(days),
+        db.select().from(activityStatus),
+        db.select().from(photos),
+        db.select().from(activities),
+      ]);
+    allOptions = allActs
+      .map((a) => ({
+        id: a.id,
+        title: a.title,
+        color: CATEGORIES[a.category].color,
+      }))
+      .sort((a, b) => a.title.localeCompare(b.title, "sv"));
     for (const ph of photoRows) {
       const list = photosByDay.get(ph.dayDate) ?? [];
       list.push(ph);
@@ -96,8 +111,17 @@ export default async function DagarPage() {
               }
             >
               <div className="flex items-center justify-between gap-2">
-                <div className="daylabel">
-                  {day.weekday} {day.label}
+                <div className="flex items-center gap-2">
+                  <div className="daylabel">
+                    {day.weekday} {day.label}
+                  </div>
+                  <Link
+                    href={`/chatt?om=${encodeURIComponent(`dagen ${day.label}`)}`}
+                    aria-label={`Chatta om ${day.label}`}
+                    className="text-primary/70"
+                  >
+                    <MessageCircle className="size-3.5" />
+                  </Link>
                 </div>
                 {w ? (
                   <div className="shrink-0 text-right text-sm">
@@ -121,31 +145,17 @@ export default async function DagarPage() {
                 </p>
               )}
 
-              {planned.length > 0 && (
-                <DayPlan dayDate={day.date} entries={planned} />
-              )}
-              {planned.length === 0 &&
-                !meta?.notes &&
-                !meta?.participants.length && (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Inget planerat än — dag {day.dayNumber} av 15
-                    {isToday && " · idag"}
-                  </p>
-                )}
-
-              {meta && meta.participants.length > 0 && (
-                <p className="mt-2 flex flex-wrap gap-1">
-                  {meta.participants.map((p) => (
-                    <span
-                      key={p}
-                      className="rounded-full px-2 py-0.5 text-[11px] font-bold"
-                      style={pillStyle(personColor(p))}
-                    >
-                      {p}
-                    </span>
-                  ))}
+              {planned.length === 0 && !meta?.notes && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Inget planerat än — dag {day.dayNumber} av 15
+                  {isToday && " · idag"}
                 </p>
               )}
+              <DayPlan
+                dayDate={day.date}
+                entries={planned}
+                allActivities={allOptions}
+              />
               {meta?.notes && (
                 <p className="mt-2 rounded-md bg-muted p-2 text-xs text-muted-foreground">
                   {meta.notes}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/logout-button";
 import { eq } from "drizzle-orm";
 import { getDb, hasDb } from "@/lib/db";
 import { activities, dayActivities, days } from "@/lib/db/schema";
@@ -222,6 +223,10 @@ export default async function DashboardPage() {
           </p>
         </Link>
       </section>
+
+      <div className="pb-2 text-center">
+        <LogoutButton />
+      </div>
     </div>
   );
 }

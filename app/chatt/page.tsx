@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import ReactMarkdown from "react-markdown";
 import { personColor } from "@/lib/family";
@@ -20,6 +21,14 @@ type StreamItem =
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function ChattPage() {
+  return (
+    <Suspense>
+      <ChatInner />
+    </Suspense>
+  );
+}
+
+function ChatInner() {
   const [name, setName] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState<string | null>(null);
@@ -27,6 +36,7 @@ export default function ChattPage() {
   const [toolLabels, setToolLabels] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
 
   const { data, mutate } = useSWR<{ messages: Msg[]; dbMissing?: boolean }>(
     name ? `/api/messages?me=${encodeURIComponent(name)}` : null,
@@ -37,6 +47,12 @@ export default function ChattPage() {
   useEffect(() => {
     setName(localStorage.getItem("mpl26:name"));
   }, []);
+
+  // "Chatta om ..."-länkar förifyller skrivfältet
+  const om = searchParams.get("om");
+  useEffect(() => {
+    if (om) setInput(`Om ${om}: `);
+  }, [om]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,15 +121,7 @@ export default function ChattPage() {
           </h1>
         </div>
         {name && (
-          <button
-            onClick={() => {
-              localStorage.removeItem("mpl26:name");
-              location.reload();
-            }}
-            className="text-xs text-muted-foreground underline underline-offset-2"
-          >
-            Du är {name} — byt
-          </button>
+          <span className="text-xs text-muted-foreground">Du är {name}</span>
         )}
       </header>
 

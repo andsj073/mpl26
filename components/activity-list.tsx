@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink, MapPin } from "lucide-react";
+import Link from "next/link";
+import { ExternalLink, MapPin, MessageCircle } from "lucide-react";
 import type { Activity } from "@/lib/db/schema";
 import { CATEGORIES, pillStyle, type Category } from "@/lib/categories";
 import { DISTANCE_FILTERS, kmFromHome } from "@/lib/geo";
@@ -316,14 +317,7 @@ function ActivityCard({
           {me && (
             <div onClick={(e) => e.stopPropagation()}>
               <button
-                onClick={() => {
-                  if (myStatus === 2) {
-                    onSet(0, null);
-                    setChoosing(false);
-                  } else {
-                    setChoosing(!choosing);
-                  }
-                }}
+                onClick={() => setChoosing(!choosing)}
                 className="w-full rounded-lg border py-2 text-sm font-bold transition-colors"
                 style={
                   myStatus === 0
@@ -341,14 +335,16 @@ function ActivityCard({
                 {myStatus === 1 &&
                   `${me} planerar ${fmtDay(myRow?.dayDate ?? null)} — tryck när du gjort det`}
                 {myStatus === 2 &&
-                  `${me} har gjort det här ✓ — tryck för att nollställa`}
+                  `${me} har gjort det här ${fmtDay(myRow?.dayDate ?? null)} ✓`}
               </button>
               {choosing && (
                 <div className="mt-1.5 rounded-lg border border-border bg-popover p-2">
                   <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                     {myStatus === 0
                       ? "Vilken dag planerar du det?"
-                      : "Vilken dag gjorde du det?"}
+                      : myStatus === 1
+                        ? "Vilken dag gjorde du det?"
+                        : "Ändra dag för när du gjorde det"}
                   </p>
                   <div className="grid grid-cols-5 gap-1">
                     {TRIP_DAYS.map((d) => {
@@ -374,6 +370,17 @@ function ActivityCard({
                       );
                     })}
                   </div>
+                  {myStatus > 0 && (
+                    <button
+                      onClick={() => {
+                        onSet(0, null);
+                        setChoosing(false);
+                      }}
+                      className="mt-1.5 w-full rounded-md border border-destructive/50 py-1.5 text-[12px] font-bold text-destructive"
+                    >
+                      ✕ {myStatus === 1 ? "Ta bort min planering" : "Nollställ — jag har inte gjort den"}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -390,6 +397,12 @@ function ActivityCard({
             >
               <MapPin className="size-3.5" /> Karta
             </a>
+            <Link
+              href={`/chatt?om=${encodeURIComponent(`aktiviteten "${a.title}"`)}`}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+            >
+              <MessageCircle className="size-3.5" /> Chatta om denna
+            </Link>
             {a.websiteUrl && (
               <a
                 href={a.websiteUrl}
