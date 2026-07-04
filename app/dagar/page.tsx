@@ -98,7 +98,7 @@ export default async function DagarPage() {
                 </p>
               )}
 
-              {planned.length > 0 ? (
+              {planned.length > 0 && (
                 <ul className="mt-2 space-y-1">
                   {planned.map((a) => (
                     <li key={a.id} className="flex items-center gap-2 text-sm">
@@ -112,12 +112,15 @@ export default async function DagarPage() {
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Inget planerat än — dag {day.dayNumber} av 15
-                  {isToday && " · idag"}
-                </p>
               )}
+              {planned.length === 0 &&
+                !meta?.notes &&
+                !meta?.participants.length && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Inget planerat än — dag {day.dayNumber} av 15
+                    {isToday && " · idag"}
+                  </p>
+                )}
 
               {meta && meta.participants.length > 0 && (
                 <p className="mt-2 flex flex-wrap gap-1">
